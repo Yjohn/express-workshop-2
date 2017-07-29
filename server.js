@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const fs = require('fs');
+const readPosts = require('./helpers/readPosts');
 
 const exphbs = require('express-handlebars');
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
@@ -10,23 +11,29 @@ app.set('view engine', 'handlebars');
 app.use(express.static("public", { 'extensions': ['html'] }));
 
 app.get('/', function (req, res) {
-    const filePath = __dirname + '/data/posts.json';
-    const callbackFunction = function(error, file) {
-        // we call .toString() to turn the file buffer to a String
-        const fileData = file.toString();
-        // we use JSON.parse to get an object out the String
-        const postsJson = JSON.parse(fileData);
-        // send the json to the Template to render
-        res.render('index', {
-          title: 'yohannes Profile', // insert your name instead
-          posts: postsJson
-        });
-    };
-    fs.readFile(filePath, callbackFunction);
+  const filePath = __dirname + '/data/posts.json';
+  const callbackFunction = function (error, file) {
+    // we call .toString() to turn the file buffer to a String
+    const fileData = file.toString();
+    // we use JSON.parse to get an object out the String
+    const postsJson = JSON.parse(fileData);
+    // send the json to the Template to render
+    res.render('index', {
+      title: 'yohannes Profile', // insert your name instead
+      posts: postsJson
+    });
+  };
+  fs.readFile(filePath, callbackFunction);
+});
+
+app.get('/api/posts', function (req, res) {
+  readPosts(function (error, posts) {
+    res.json(posts);
+  })
 });
 
 app.get("/my-cv", function (req, res) {
-  res.render("my-cv",{
+  res.render("my-cv", {
     subheading: "this is all my curriculum vita",
   });
 });
@@ -38,7 +45,7 @@ app.get("/admin", function (req, res) {
 });
 
 app.get("/contact", function (req, res) {
-  res.render("contact",{
+  res.render("contact", {
     subheading: "Welcome to the contact page"
   });
 });
